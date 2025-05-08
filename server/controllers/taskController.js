@@ -22,12 +22,31 @@ exports.createTask = async (req, res) => {
 exports.getTasks = async (req, res) => {
   const role = req.user.role;
   const userId = req.user.id;
+  const { status, priority } = req.query; // filter params from URL
 
   try {
+    let query = {};
+
+    if (role === "admin") {
+      query.createdBy = userId;
+    } else {
+      query.assignedTo = userId;
+    }
+
+    // Filter by status if provided
+    if (status) {
+      query.status = status;
+    }
+
+    // Filter by priority if provided
+    if (priority) {
+      query.priority = priority;
+    }
+
     const tasks =
       role === "admin"
-        ? await Task.find({ createdBy: userId }).populate("assignedTo")
-        : await Task.find({ assignedTo: userId }).populate("createdBy");
+        ? await Task.find(query).populate("assignedTo")
+        : await Task.find(query).populate("createdBy");
 
     res.json(tasks);
   } catch (err) {
