@@ -13,6 +13,16 @@ exports.createTask = async (req, res) => {
       deadline,
       createdBy: req.user.id,
     });
+
+    // Emit notification to assigned users
+    const io = require("../sockets/index"); // or wherever io is exported
+    assignedTo.forEach((userId) => {
+      io.to(userId).emit("taskAssigned", {
+        message: `You have been assigned a new task: ${title}`,
+        task,
+      });
+    });
+
     res.status(201).json(task);
   } catch (err) {
     res.status(500).json({ msg: err.message });
