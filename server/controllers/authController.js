@@ -9,6 +9,7 @@ exports.register = async (req, res) => {
     const user = await User.create({ name, email, password: hash, role });
     res.status(201).json({
       msg: "User created",
+      id: user._id,
       name: user.name,
       email: user.email,
       password: user.password,
